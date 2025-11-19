@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # 🇺🇸 Secure Voting System Simulation
 
 A comprehensive web-based voting system that demonstrates advanced cryptographic techniques for secure, anonymous electronic voting. Built with Python Flask and featuring military-grade AES-256 encryption.
@@ -269,3 +270,7 @@ This system upholds democratic principles through technology, ensuring every vot
 ---
 
 🇺🇸 **Built for Democracy** • **Secured by Encryption** • **Powered by Python** 🇺🇸
+=======
+# CSC455_Project
+Secure Voting System Simulation Simulate 
+>>>>>>> c0434a86d37e86228a61e365a5e2f3068895850b

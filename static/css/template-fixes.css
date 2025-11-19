@@ -1,0 +1,58 @@
+/* 
+CSS FIX FOR TEMPLATE ERRORS
+============================
+
+This file addresses VS Code CSS linting warnings in HTML templates.
+The warnings occur because VS Code's CSS parser doesn't understand 
+Jinja2 template syntax within style attributes.
+
+These are NOT actual errors - just linting warnings that can be safely ignored.
+*/
+
+/* VS Code Workspace Settings to reduce template syntax warnings */
+/* Add this to your .vscode/settings.json file: */
+
+/*
+{
+    "html.validate.styles": false,
+    "css.validate": false,
+    "emmet.includeLanguages": {
+        "jinja-html": "html"
+    },
+    "files.associations": {
+        "*.html": "jinja-html"
+    }
+}
+*/
+
+/* Alternative: Use data attributes instead of inline styles */
+.progress-bar[data-width] {
+    transition: width 2s ease-out;
+}
+
+/* Style for admin dashboard progress bars */
+.admin-progress {
+    height: 20px;
+    border-radius: 10px;
+    background-color: #f8f9fa;
+    border: 1px solid #dee2e6;
+}
+
+.admin-progress .progress-bar {
+    border-radius: 10px;
+    transition: width 2s ease-out;
+}
+
+/* Style for results page progress bars */
+.results-progress {
+    height: 30px;
+    border-radius: 15px;
+    background-color: #f8f9fa;
+    border: 1px solid #dee2e6;
+}
+
+.results-progress .progress-bar {
+    border-radius: 15px;
+    background: linear-gradient(90deg, var(--flag-red), var(--flag-blue));
+    transition: width 1.5s ease-out;
+}
