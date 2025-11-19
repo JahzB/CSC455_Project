@@ -1,0 +1,16 @@
+# SECURE VOTING SYSTEM REQUIREMENTS
+# =================================
+# 
+# This file lists all Python packages required for the secure voting system.
+# Install with: pip install -r requirements.txt
+#
+# PACKAGE DESCRIPTIONS:
+# - flask: Web framework for the voting application
+# - pycryptodome: Cryptographic library for AES encryption
+# - bcrypt: Password hashing library for secure authentication
+# - cryptography: Additional cryptographic primitives
+
+flask>=2.3.0
+pycryptodome>=3.18.0
+bcrypt>=4.0.0
+cryptography>=41.0.0

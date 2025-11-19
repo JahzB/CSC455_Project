@@ -1,0 +1,299 @@
+{% extends "base.html" %}
+
+{% block title %}Home - Secure Voting System{% endblock %}
+
+{% block content %}
+<!--
+HOME PAGE TEMPLATE
+==================
+
+HOW THIS PAGE WORKS:
+- Landing page that welcomes users to the secure voting system
+- Displays system features and security information
+- Provides clear navigation to login or registration
+- Shows patriotic theme with American flag colors and quotes
+- Explains the voting process and security features
+
+CONNECTIONS TO OTHER PAGES:
+- Links to login.html for existing users
+- Links to register.html for new users
+- Connected to base.html template for consistent styling
+- Provides entry point to the entire voting system
+
+USER EXPERIENCE:
+- Professional yet welcoming design
+- Clear call-to-action buttons
+- Educational content about voting rights
+- Security feature highlights
+-->
+
+<div class="main-container">
+    <!-- Welcome Section -->
+    <div class="text-center mb-4">
+        <div class="flag-decoration mb-3">
+            🇺🇸 ⭐ 🇺🇸 ⭐ 🇺🇸
+        </div>
+        <h1 class="display-4 fw-bold" style="color: var(--flag-blue);">
+            Welcome to the Secure Voting System
+        </h1>
+        <p class="lead" style="color: var(--flag-red);">
+            <i class="fas fa-shield-alt"></i>
+            Your vote, your voice, your democracy - protected by advanced encryption
+        </p>
+    </div>
+
+    <!-- System Features Cards -->
+    <div class="row g-4 mb-5">
+        <!-- Security Feature -->
+        <div class="col-md-4">
+            <div class="flag-card text-center h-100">
+                <div class="mb-3">
+                    <i class="fas fa-lock fa-3x" style="color: var(--flag-blue);"></i>
+                </div>
+                <h4 style="color: var(--flag-red);">🔐 Advanced Security</h4>
+                <p>
+                    Your votes are protected with AES-256 encryption, ensuring complete anonymity 
+                    and data integrity throughout the entire voting process.
+                </p>
+                <ul class="list-unstyled">
+                    <li><i class="fas fa-check text-success"></i> AES-256 Encryption</li>
+                    <li><i class="fas fa-check text-success"></i> Anonymous Voting</li>
+                    <li><i class="fas fa-check text-success"></i> Secure Hash Functions</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- User-Friendly Feature -->
+        <div class="col-md-4">
+            <div class="flag-card text-center h-100">
+                <div class="mb-3">
+                    <i class="fas fa-users fa-3x" style="color: var(--flag-red);"></i>
+                </div>
+                <h4 style="color: var(--flag-blue);">👥 User-Friendly</h4>
+                <p>
+                    Intuitive interface designed for voters of all technical backgrounds. 
+                    Simple registration, easy voting, and clear results display.
+                </p>
+                <ul class="list-unstyled">
+                    <li><i class="fas fa-check text-success"></i> Simple Registration</li>
+                    <li><i class="fas fa-check text-success"></i> Clear Instructions</li>
+                    <li><i class="fas fa-check text-success"></i> Responsive Design</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Democratic Process Feature -->
+        <div class="col-md-4">
+            <div class="flag-card text-center h-100">
+                <div class="mb-3">
+                    <i class="fas fa-balance-scale fa-3x" style="color: var(--star-field);"></i>
+                </div>
+                <h4 style="color: var(--flag-red);">⚖️ Democratic</h4>
+                <p>
+                    Transparent tallying process that maintains voter privacy while ensuring 
+                    every vote counts and results are accurate and verifiable.
+                </p>
+                <ul class="list-unstyled">
+                    <li><i class="fas fa-check text-success"></i> Transparent Counting</li>
+                    <li><i class="fas fa-check text-success"></i> Real-time Results</li>
+                    <li><i class="fas fa-check text-success"></i> Audit Trail</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- How It Works Section -->
+    <div class="flag-card mb-4">
+        <h3 class="text-center mb-4" style="color: var(--flag-blue);">
+            <i class="fas fa-info-circle"></i>
+            How the Secure Voting Process Works
+        </h3>
+        
+        <div class="row">
+            <div class="col-md-3 text-center mb-3">
+                <div class="mb-3">
+                    <i class="fas fa-user-plus fa-2x" style="color: var(--flag-red);"></i>
+                </div>
+                <h5>1. Register</h5>
+                <p class="small">
+                    Create a secure account with a unique username and strong password. 
+                    Your credentials are hashed and stored securely.
+                </p>
+            </div>
+            
+            <div class="col-md-3 text-center mb-3">
+                <div class="mb-3">
+                    <i class="fas fa-sign-in-alt fa-2x" style="color: var(--flag-blue);"></i>
+                </div>
+                <h5>2. Login</h5>
+                <p class="small">
+                    Access the voting system with your credentials. Your session is 
+                    protected with secure cookies and encryption.
+                </p>
+            </div>
+            
+            <div class="col-md-3 text-center mb-3">
+                <div class="mb-3">
+                    <i class="fas fa-vote-yea fa-2x" style="color: var(--flag-red);"></i>
+                </div>
+                <h5>3. Vote</h5>
+                <p class="small">
+                    Cast your ballot securely. Your vote is encrypted before storage 
+                    and your identity is anonymized for complete privacy.
+                </p>
+            </div>
+            
+            <div class="col-md-3 text-center mb-3">
+                <div class="mb-3">
+                    <i class="fas fa-chart-bar fa-2x" style="color: var(--star-field);"></i>
+                </div>
+                <h5>4. Results</h5>
+                <p class="small">
+                    View real-time election results. Votes are decrypted and tallied 
+                    anonymously while maintaining complete voter privacy.
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="text-center mb-4">
+        <h3 style="color: var(--flag-blue);" class="mb-3">Ready to Participate?</h3>
+        
+        {% if not session.logged_in %}
+        <div class="d-grid gap-3 d-md-flex justify-content-center">
+            <a href="{{ url_for('register') }}" class="btn btn-patriot btn-lg">
+                <i class="fas fa-user-plus"></i>
+                Register to Vote
+            </a>
+            <a href="{{ url_for('login') }}" class="btn btn-outline-primary btn-lg">
+                <i class="fas fa-sign-in-alt"></i>
+                Login
+            </a>
+        </div>
+        
+        <div class="mt-3">
+            <small class="text-muted">
+                <i class="fas fa-info-circle"></i>
+                New users need to register first. Existing users can login directly.
+            </small>
+        </div>
+        {% else %}
+        <div class="d-grid gap-3 d-md-flex justify-content-center">
+            <a href="{{ url_for('vote') }}" class="btn btn-patriot btn-lg">
+                <i class="fas fa-vote-yea"></i>
+                Cast Your Vote
+            </a>
+            <a href="{{ url_for('results') }}" class="btn btn-outline-primary btn-lg">
+                <i class="fas fa-chart-bar"></i>
+                View Results
+            </a>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- System Statistics (if available) -->
+    <div class="flag-card text-center">
+        <h4 style="color: var(--flag-red);">
+            <i class="fas fa-chart-line"></i>
+            System Status
+        </h4>
+        <div class="row">
+            <div class="col-md-4">
+                <div class="vote-stat">
+                    <h3><i class="fas fa-shield-alt"></i></h3>
+                    <p class="mb-0"><strong>Security Level</strong><br>Military Grade</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="vote-stat">
+                    <h3><i class="fas fa-clock"></i></h3>
+                    <p class="mb-0"><strong>System Status</strong><br>Online & Secure</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="vote-stat">
+                    <h3><i class="fas fa-users"></i></h3>
+                    <p class="mb-0"><strong>Democracy</strong><br>Every Vote Counts</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Educational Content -->
+    <div class="mt-4 text-center">
+        <h5 style="color: var(--flag-blue);">
+            <i class="fas fa-graduation-cap"></i>
+            About Secure Voting Technology
+        </h5>
+        <p class="text-muted">
+            This system demonstrates modern cryptographic techniques for secure electronic voting. 
+            Using AES-256 encryption, secure hash functions, and anonymous voter identification, 
+            we ensure that your vote remains private while maintaining the integrity of the 
+            democratic process.
+        </p>
+        <div class="mt-3">
+            <span class="badge bg-primary me-2">
+                <i class="fas fa-code"></i> Python Flask
+            </span>
+            <span class="badge bg-success me-2">
+                <i class="fas fa-lock"></i> PyCryptodome
+            </span>
+            <span class="badge bg-info me-2">
+                <i class="fas fa-shield-alt"></i> Bcrypt
+            </span>
+            <span class="badge bg-warning">
+                <i class="fas fa-database"></i> Secure Storage
+            </span>
+        </div>
+    </div>
+</div>
+
+<!-- Scroll to top button for better UX -->
+<script>
+// Add scroll to top functionality for longer pages
+window.onscroll = function() {scrollFunction()};
+
+function scrollFunction() {
+    if (document.body.scrollTop > 20 || document.documentElement.scrollTop > 20) {
+        document.getElementById("scrollTopBtn").style.display = "block";
+    } else {
+        document.getElementById("scrollTopBtn").style.display = "none";
+    }
+}
+
+function topFunction() {
+    document.body.scrollTop = 0;
+    document.documentElement.scrollTop = 0;
+}
+</script>
+
+<!-- Floating scroll to top button -->
+<button onclick="topFunction()" id="scrollTopBtn" title="Go to top" 
+        style="display: none; position: fixed; bottom: 20px; right: 30px; z-index: 99; 
+               border: none; outline: none; background-color: var(--flag-red); 
+               color: white; cursor: pointer; padding: 15px; border-radius: 10px;">
+    <i class="fas fa-arrow-up"></i>
+</button>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Add entrance animation
+    document.addEventListener('DOMContentLoaded', function() {
+        const cards = document.querySelectorAll('.flag-card');
+        cards.forEach((card, index) => {
+            setTimeout(() => {
+                card.style.opacity = '0';
+                card.style.transform = 'translateY(20px)';
+                card.style.transition = 'all 0.5s ease';
+                setTimeout(() => {
+                    card.style.opacity = '1';
+                    card.style.transform = 'translateY(0)';
+                }, 100);
+            }, index * 200);
+        });
+    });
+</script>
+{% endblock %}

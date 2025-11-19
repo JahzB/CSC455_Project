@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Secure Voting System{% endblock %}</title>
+    
+    <!-- Bootstrap CSS for responsive design -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <!-- Custom CSS for American flag theme -->
+    <style>
+        /* 
+        AMERICAN FLAG THEME STYLING
+        ===========================
+        This CSS creates a patriotic red, white, and blue theme
+        inspired by the American flag colors and design principles.
+        */
+        
+        :root {
+            /* American Flag Color Palette */
+            --flag-red: #B22234;
+            --flag-white: #FFFFFF; 
+            --flag-blue: #3C3B6E;
+            --star-field: #002868;
+            --text-dark: #1a1a1a;
+        }
+        
+        body {
+            background: linear-gradient(135deg, var(--flag-blue) 0%, var(--flag-white) 50%, var(--flag-red) 100%);
+            min-height: 100vh;
+            font-family: 'Georgia', 'Times New Roman', serif;
+            color: var(--text-dark);
+        }
+        
+        /* Flag-inspired header styling */
+        .flag-header {
+            background: linear-gradient(to right, 
+                var(--flag-blue) 0% 30%, 
+                var(--flag-white) 30% 70%, 
+                var(--flag-red) 70% 100%);
+            padding: 20px 0;
+            border-bottom: 3px solid var(--star-field);
+            position: relative;
+            overflow: hidden;
+        }
+        
+
+        
+        /* Responsive header text with simple dark blue styling */
+        .democracy-header {
+            color: var(--flag-blue);
+            font-weight: 900;
+            font-size: 2.5rem;
+            letter-spacing: 2px;
+            text-shadow: 
+                1px 1px 2px rgba(255, 255, 255, 0.8),
+                2px 2px 4px rgba(0, 0, 0, 0.3);
+            z-index: 2;
+        }
+        
+        /* Keep shield icon white */
+        .democracy-header .fas {
+            color: var(--flag-white);
+            text-shadow: 
+                1px 1px 2px rgba(0, 0, 0, 0.8),
+                2px 2px 4px rgba(0, 0, 0, 0.6);
+        }
+        
+        /* Text readability overlay - lighter for blue text */
+        .header-text-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, 
+                rgba(255, 255, 255, 0.2) 0%,
+                rgba(255, 255, 255, 0.4) 25%,
+                rgba(255, 255, 255, 0.6) 50%,
+                rgba(255, 255, 255, 0.4) 75%,
+                rgba(255, 255, 255, 0.2) 100%);
+            z-index: 1;
+            pointer-events: none;
+        }
+        
+        /* Enhanced visibility on different screen sizes */
+        @media (max-width: 768px) {
+            .democracy-header {
+                font-size: 2rem;
+                letter-spacing: 1px;
+                -webkit-text-stroke: 1.5px var(--text-dark);
+            }
+        }
+        
+        /* Alternative high-contrast version for better accessibility */
+        .democracy-header-alt {
+            background: linear-gradient(45deg, 
+                var(--flag-blue) 0%,
+                var(--flag-white) 25%,
+                var(--flag-red) 50%,
+                var(--flag-white) 75%,
+                var(--flag-blue) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-weight: 900;
+            text-shadow: 
+                2px 2px 4px rgba(0, 0, 0, 0.8),
+                -2px -2px 4px rgba(255, 255, 255, 0.8);
+        }
+        
+        /* Main content container */
+        .main-container {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            margin: 30px auto;
+            padding: 40px;
+            border: 2px solid var(--flag-blue);
+        }
+        
+        /* American flag card styling */
+        .flag-card {
+            background: var(--flag-white);
+            border: 3px solid var(--flag-blue);
+            border-radius: 10px;
+            padding: 25px;
+            margin: 20px 0;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .flag-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 8px;
+            background: repeating-linear-gradient(
+                to right,
+                var(--flag-red) 0px 20px,
+                var(--flag-white) 20px 40px
+            );
+        }
+        
+        /* Button styling with flag theme */
+        .btn-patriot {
+            background: linear-gradient(45deg, var(--flag-blue), var(--flag-red));
+            color: var(--flag-white);
+            border: none;
+            padding: 12px 30px;
+            border-radius: 25px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .btn-patriot:hover {
+            background: linear-gradient(45deg, var(--flag-red), var(--flag-blue));
+            color: var(--flag-white);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+        
+        /* Navigation styling */
+        .navbar-patriot {
+            background: var(--flag-blue) !important;
+            border-bottom: 3px solid var(--flag-red);
+        }
+        
+        .navbar-patriot .navbar-brand,
+        .navbar-patriot .navbar-nav .nav-link {
+            color: var(--flag-white) !important;
+            font-weight: bold;
+        }
+        
+        .navbar-patriot .navbar-nav .nav-link:hover {
+            color: var(--flag-red) !important;
+        }
+        
+        /* Form styling */
+        .form-control {
+            border: 2px solid var(--flag-blue);
+            border-radius: 8px;
+            padding: 12px;
+        }
+        
+        .form-control:focus {
+            border-color: var(--flag-red);
+            box-shadow: 0 0 0 0.2rem rgba(178, 34, 52, 0.25);
+        }
+        
+        /* Quote styling */
+        .constitutional-quote {
+            background: linear-gradient(135deg, var(--flag-blue), var(--star-field));
+            color: var(--flag-white);
+            padding: 20px;
+            border-radius: 10px;
+            border-left: 5px solid var(--flag-red);
+            margin: 20px 0;
+            font-style: italic;
+            position: relative;
+        }
+        
+        .constitutional-quote::before {
+            content: '"';
+            font-size: 4em;
+            position: absolute;
+            top: -10px;
+            left: 20px;
+            color: var(--flag-red);
+            opacity: 0.5;
+        }
+        
+        /* Alert styling */
+        .alert-success {
+            background-color: rgba(178, 34, 52, 0.1);
+            border-color: var(--flag-red);
+            color: var(--flag-red);
+        }
+        
+        .alert-danger {
+            background-color: rgba(60, 59, 110, 0.1);
+            border-color: var(--flag-blue);
+            color: var(--flag-blue);
+        }
+        
+        /* Flag decoration */
+        .flag-decoration {
+            text-align: center;
+            margin: 20px 0;
+            font-size: 2em;
+        }
+        
+        /* Vote counter styling */
+        .vote-stat {
+            background: var(--flag-white);
+            border: 2px solid var(--flag-blue);
+            border-radius: 10px;
+            padding: 20px;
+            text-align: center;
+            margin: 10px 0;
+        }
+        
+        .vote-stat h3 {
+            color: var(--flag-red);
+            margin-bottom: 10px;
+        }
+        
+        /* Progress bar styling */
+        .progress {
+            height: 25px;
+            background-color: var(--flag-white);
+            border: 2px solid var(--flag-blue);
+        }
+        
+        .progress-bar {
+            background: linear-gradient(90deg, var(--flag-red), var(--flag-blue));
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation Bar -->
+    <nav class="navbar navbar-expand-lg navbar-patriot">
+        <div class="container">
+            <!-- System Title with Flag Icon -->
+            <a class="navbar-brand" href="{{ url_for('home') }}">
+                <i class="fas fa-vote-yea"></i>
+                🇺🇸 Secure Voting System
+            </a>
+            
+            <!-- Navigation Toggle for Mobile -->
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            
+            <!-- Navigation Links -->
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('home') }}">
+                            <i class="fas fa-home"></i> Home
+                        </a>
+                    </li>
+                    {% if session.logged_in %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ url_for('vote') }}">
+                                <i class="fas fa-check-square"></i> Vote
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ url_for('results') }}">
+                                <i class="fas fa-chart-bar"></i> Results
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ url_for('logout') }}">
+                                <i class="fas fa-sign-out-alt"></i> Logout
+                            </a>
+                        </li>
+                    {% else %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ url_for('login') }}">
+                                <i class="fas fa-sign-in-alt"></i> Login
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ url_for('register') }}">
+                                <i class="fas fa-user-plus"></i> Register
+                            </a>
+                        </li>
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Flag Header -->
+    <div class="flag-header">
+        <div class="container text-center position-relative">
+            <!-- Semi-transparent overlay for text readability -->
+            <div class="header-text-overlay"></div>
+            <h1 class="democracy-header position-relative">
+                <i class="fas fa-shield-alt me-3"></i>
+                DEMOCRACY IN ACTION
+            </h1>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="container">
+        <!-- Flash Messages -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div class="mt-3">
+                    {% for category, message in messages %}
+                        <div class="alert alert-{{ 'success' if category == 'success' else 'danger' }} alert-dismissible fade show" role="alert">
+                            <i class="fas fa-{{ 'check-circle' if category == 'success' else 'exclamation-triangle' }}"></i>
+                            {{ message }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+
+        <!-- Page Content -->
+        {% block content %}{% endblock %}
+        
+        <!-- Constitutional Quote Section -->
+        {% if quote %}
+        <div class="constitutional-quote">
+            <div class="row align-items-center">
+                <div class="col-md-10">
+                    <p class="mb-0">{{ quote }}</p>
+                </div>
+                <div class="col-md-2 text-end">
+                    <div class="flag-decoration">🇺🇸</div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Footer -->
+    <footer class="mt-5 py-4" style="background-color: var(--flag-blue); color: var(--flag-white);">
+        <div class="container text-center">
+            <p class="mb-2">
+                <i class="fas fa-lock"></i>
+                Secure • Anonymous • Democratic
+            </p>
+            <p class="mb-0">
+                <small>Powered by AES-256 Encryption | Built for Democracy</small>
+            </p>
+        </div>
+    </footer>
+
+    <!-- Bootstrap JavaScript -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Custom JavaScript for enhanced functionality -->
+    <script>
+        // Auto-dismiss alerts after 5 seconds
+        setTimeout(function() {
+            document.querySelectorAll('.alert').forEach(function(alert) {
+                let bsAlert = new bootstrap.Alert(alert);
+                bsAlert.close();
+            });
+        }, 5000);
+        
+        // Dynamic header text visibility enhancement - simplified
+        function enhanceHeaderVisibility() {
+            const header = document.querySelector('.democracy-header');
+            const icon = header?.querySelector('.fas');
+            if (!header || !icon) return;
+            
+            // Keep text dark blue and icon white for consistency
+            header.style.color = 'var(--flag-blue)';
+            icon.style.color = 'var(--flag-white)';
+        }
+        
+        // Add patriotic animations on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('🇺🇸 Secure Voting System Loaded');
+            
+            // Enhance header visibility
+            enhanceHeaderVisibility();
+            
+            // Re-enhance on window resize
+            window.addEventListener('resize', enhanceHeaderVisibility);
+            
+            // Add subtle animation to democracy header
+            const democracyHeader = document.querySelector('.democracy-header');
+            if (democracyHeader) {
+                democracyHeader.style.animation = 'subtle-glow 3s ease-in-out infinite alternate';
+            }
+        });
+    </script>
+    
+    <!-- Add custom CSS animations -->
+    <style>
+        @keyframes subtle-glow {
+            0% { 
+                text-shadow: 
+                    1px 1px 2px rgba(255, 255, 255, 0.8),
+                    2px 2px 4px rgba(0, 0, 0, 0.3);
+            }
+            100% { 
+                text-shadow: 
+                    1px 1px 2px rgba(255, 255, 255, 0.9),
+                    2px 2px 6px rgba(0, 0, 0, 0.4),
+                    0 0 8px rgba(60, 59, 110, 0.3);
+            }
+        }
+        
+        /* Clean text styling for dark blue header */
+        .democracy-header {
+            text-shadow: 
+                1px 1px 2px rgba(255, 255, 255, 0.8),
+                2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+    </style>
+    
+    {% block scripts %}{% endblock %}
+</body>
+</html>

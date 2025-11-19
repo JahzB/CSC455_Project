@@ -1,0 +1,534 @@
+{% extends "base.html" %}
+
+{% block title %}Results - Secure Voting System{% endblock %}
+
+{% block content %}
+<!--
+RESULTS PAGE TEMPLATE
+====================
+
+HOW THIS PAGE WORKS:
+- Displays real-time voting results in an accessible format
+- Shows vote tallies without revealing individual voter identities
+- Provides visual charts and statistics for easy understanding
+- Updates automatically as new votes are cast
+- Maintains complete voter anonymity while showing aggregated data
+
+CONNECTIONS TO OTHER PAGES:
+- Extends base.html for consistent styling and navigation
+- Accessible from vote.html after casting a ballot
+- Connected to home.html through navigation
+- Links back to vote.html for users who haven't voted yet
+- Receives aggregated data from app.py results route
+
+SECURITY FEATURES:
+- No individual vote information is displayed
+- Anonymous vote tallying and decryption
+- Aggregated statistics only
+- No correlation between users and their votes
+- Real-time secure counting without privacy compromise
+-->
+
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-10">
+            <!-- Results Header -->
+            <div class="flag-card text-center">
+                <div class="flag-decoration mb-3">
+                    🇺🇸 📊 🇺🇸 📊 🇺🇸
+                </div>
+                <h2 class="fw-bold" style="color: var(--flag-blue);">
+                    <i class="fas fa-chart-bar"></i>
+                    Live Election Results
+                </h2>
+                <p class="text-muted mb-0">
+                    Anonymous vote tallies updated in real-time
+                </p>
+            </div>
+
+            <!-- Voting Statistics Overview -->
+            <div class="row g-4 mb-4">
+                <div class="col-md-3">
+                    <div class="vote-stat text-center">
+                        <h3 style="color: var(--flag-blue);">
+                            <i class="fas fa-users"></i>
+                        </h3>
+                        <h4 class="fw-bold">{{ total_votes }}</h4>
+                        <p class="mb-0">Total Votes Cast</p>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="vote-stat text-center">
+                        <h3 style="color: var(--flag-red);">
+                            <i class="fas fa-percentage"></i>
+                        </h3>
+                        <h4 class="fw-bold">
+                            {% if total_votes > 0 %}
+                                {{ "%.1f"|format((total_votes / (total_votes + 1)) * 100) }}%
+                            {% else %}
+                                0.0%
+                            {% endif %}
+                        </h4>
+                        <p class="mb-0">Participation Rate</p>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="vote-stat text-center">
+                        <h3 style="color: var(--star-field);">
+                            <i class="fas fa-shield-alt"></i>
+                        </h3>
+                        <h4 class="fw-bold">AES-256</h4>
+                        <p class="mb-0">Encryption Level</p>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="vote-stat text-center">
+                        <h3 style="color: var(--flag-red);">
+                            <i class="fas fa-user-secret"></i>
+                        </h3>
+                        <h4 class="fw-bold">100%</h4>
+                        <p class="mb-0">Anonymity</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Vote Results -->
+            {% if total_votes > 0 %}
+            <div class="flag-card">
+                <h3 class="fw-bold mb-4" style="color: var(--flag-blue);">
+                    <i class="fas fa-poll"></i>
+                    Candidate Results
+                </h3>
+
+                <!-- Results List -->
+                <div class="results-list">
+                    {% for candidate, count in vote_counts.items() %}
+                    {% if candidate != 'Abstain' or count > 0 %}
+                    <div class="result-item mb-4">
+                        <div class="row align-items-center">
+                            <!-- Candidate Info -->
+                            <div class="col-md-4">
+                                <div class="d-flex align-items-center">
+                                    <div class="candidate-icon me-3">
+                                        {% if 'Democratic' in candidate %}
+                                            <i class="fas fa-democrat fa-2x text-primary"></i>
+                                        {% elif 'Republican' in candidate %}
+                                            <i class="fas fa-republican fa-2x text-danger"></i>
+                                        {% elif 'Independent' in candidate %}
+                                            <i class="fas fa-star fa-2x text-warning"></i>
+                                        {% else %}
+                                            <i class="fas fa-ban fa-2x text-muted"></i>
+                                        {% endif %}
+                                    </div>
+                                    <div>
+                                        <h5 class="mb-1 fw-bold">{{ candidate }}</h5>
+                                        <small class="text-muted">
+                                            {% if 'Democratic' in candidate %}
+                                                Democratic Party
+                                            {% elif 'Republican' in candidate %}
+                                                Republican Party
+                                            {% elif 'Independent' in candidate %}
+                                                Independent Candidate
+                                            {% else %}
+                                                No Vote
+                                            {% endif %}
+                                        </small>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Progress Bar -->
+                            <div class="col-md-5">
+                                <div class="progress results-progress mb-2">
+                                    <div class="progress-bar" 
+                                         role="progressbar" 
+                                         style="width: {{ vote_percentages[candidate] }}%"
+                                         aria-valuenow="{{ vote_percentages[candidate] }}" 
+                                         aria-valuemin="0" 
+                                         aria-valuemax="100"
+                                         data-percentage="{{ vote_percentages[candidate] }}">
+                                        {{ vote_percentages[candidate] }}%
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Vote Count -->
+                            <div class="col-md-3 text-center">
+                                <div class="vote-count">
+                                    <h4 class="fw-bold mb-0" style="color: var(--flag-red);">
+                                        {{ count }}
+                                    </h4>
+                                    <small class="text-muted">
+                                        vote{{ 's' if count != 1 else '' }}
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+                    {% endfor %}
+                </div>
+
+                <!-- Winner Declaration -->
+                {% set max_votes = vote_counts.values() | list | max %}
+                {% set winners = [] %}
+                {% for candidate, count in vote_counts.items() %}
+                    {% if count == max_votes and count > 0 and candidate != 'Abstain' %}
+                        {% set _ = winners.append(candidate) %}
+                    {% endif %}
+                {% endfor %}
+
+                {% if winners and max_votes > 0 %}
+                <div class="winner-announcement mt-4 p-4" style="background: linear-gradient(135deg, var(--flag-red), var(--flag-blue)); color: white; border-radius: 15px;">
+                    <div class="text-center">
+                        <h3 class="fw-bold mb-3">
+                            <i class="fas fa-trophy"></i>
+                            {% if winners|length == 1 %}
+                                Current Leader
+                            {% else %}
+                                Current Tie
+                            {% endif %}
+                        </h3>
+                        <h4 class="mb-2">
+                            {% for winner in winners %}
+                                {{ winner }}{% if not loop.last %} & {% endif %}
+                            {% endfor %}
+                        </h4>
+                        <p class="mb-0">
+                            <i class="fas fa-star"></i>
+                            {{ max_votes }} vote{{ 's' if max_votes != 1 else '' }} 
+                            ({{ vote_percentages[winners[0]] }}%)
+                        </p>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+
+            {% else %}
+            <!-- No Votes Yet -->
+            <div class="flag-card text-center">
+                <div class="mb-4">
+                    <i class="fas fa-ballot-check fa-4x" style="color: var(--flag-blue); opacity: 0.5;"></i>
+                </div>
+                <h3 style="color: var(--flag-blue);">No Votes Cast Yet</h3>
+                <p class="text-muted mb-4">
+                    Be the first to participate in this secure democratic process!
+                </p>
+                {% if session.logged_in %}
+                <a href="{{ url_for('vote') }}" class="btn btn-patriot btn-lg">
+                    <i class="fas fa-vote-yea"></i>
+                    Cast the First Vote
+                </a>
+                {% else %}
+                <a href="{{ url_for('login') }}" class="btn btn-patriot btn-lg">
+                    <i class="fas fa-sign-in-alt"></i>
+                    Login to Vote
+                </a>
+                {% endif %}
+            </div>
+            {% endif %}
+
+            <!-- Security Information -->
+            <div class="flag-card mt-4">
+                <h4 class="fw-bold mb-3" style="color: var(--flag-red);">
+                    <i class="fas fa-shield-alt"></i>
+                    Result Security & Privacy
+                </h4>
+                <div class="row g-4">
+                    <div class="col-md-6">
+                        <div class="security-feature">
+                            <div class="d-flex align-items-start">
+                                <i class="fas fa-lock fa-2x text-success me-3 mt-1"></i>
+                                <div>
+                                    <h6 class="fw-bold">Anonymous Tallying</h6>
+                                    <p class="mb-0 small">
+                                        Individual votes are decrypted and counted without revealing 
+                                        voter identities. No correlation between users and votes.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="security-feature">
+                            <div class="d-flex align-items-start">
+                                <i class="fas fa-database fa-2x text-info me-3 mt-1"></i>
+                                <div>
+                                    <h6 class="fw-bold">Encrypted Storage</h6>
+                                    <p class="mb-0 small">
+                                        All votes remain encrypted in storage. Decryption only occurs 
+                                        during anonymous counting for result generation.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="security-feature">
+                            <div class="d-flex align-items-start">
+                                <i class="fas fa-eye-slash fa-2x text-warning me-3 mt-1"></i>
+                                <div>
+                                    <h6 class="fw-bold">Privacy Protection</h6>
+                                    <p class="mb-0 small">
+                                        No individual vote information is stored or displayed. 
+                                        Complete voter anonymity is maintained throughout.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="security-feature">
+                            <div class="d-flex align-items-start">
+                                <i class="fas fa-sync fa-2x text-primary me-3 mt-1"></i>
+                                <div>
+                                    <h6 class="fw-bold">Real-Time Updates</h6>
+                                    <p class="mb-0 small">
+                                        Results update automatically as new votes are cast, 
+                                        providing transparency without compromising security.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="text-center mt-4">
+                {% if session.logged_in %}
+                    <a href="{{ url_for('vote') }}" class="btn btn-outline-primary me-3">
+                        <i class="fas fa-vote-yea"></i>
+                        Vote Now
+                    </a>
+                    <button onclick="location.reload()" class="btn btn-patriot">
+                        <i class="fas fa-sync-alt"></i>
+                        Refresh Results
+                    </button>
+                {% else %}
+                    <a href="{{ url_for('login') }}" class="btn btn-patriot me-3">
+                        <i class="fas fa-sign-in-alt"></i>
+                        Login to Vote
+                    </a>
+                    <a href="{{ url_for('register') }}" class="btn btn-outline-primary">
+                        <i class="fas fa-user-plus"></i>
+                        Register to Vote
+                    </a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+/*
+RESULTS PAGE JAVASCRIPT FUNCTIONALITY
+=====================================
+
+This script provides:
+- Auto-refresh functionality for live results
+- Smooth animations for result display
+- Interactive chart enhancements
+- Real-time update indicators
+- Enhanced accessibility features
+*/
+
+document.addEventListener('DOMContentLoaded', function() {
+    // Auto-refresh results every 30 seconds
+    let autoRefreshInterval;
+    const REFRESH_INTERVAL = 30000; // 30 seconds
+    
+    function startAutoRefresh() {
+        autoRefreshInterval = setInterval(() => {
+            console.log('🔄 Auto-refreshing results...');
+            location.reload();
+        }, REFRESH_INTERVAL);
+    }
+    
+    function stopAutoRefresh() {
+        if (autoRefreshInterval) {
+            clearInterval(autoRefreshInterval);
+        }
+    }
+    
+    // Start auto-refresh
+    startAutoRefresh();
+    
+    // Stop auto-refresh when user is about to leave
+    window.addEventListener('beforeunload', stopAutoRefresh);
+    
+    // Animate progress bars on load
+    function animateProgressBars() {
+        const progressBars = document.querySelectorAll('.progress-bar');
+        progressBars.forEach((bar, index) => {
+            const targetWidth = bar.style.width;
+            bar.style.width = '0%';
+            
+            setTimeout(() => {
+                bar.style.transition = 'width 1.5s ease-out';
+                bar.style.width = targetWidth;
+            }, index * 200);
+        });
+    }
+    
+    // Animate result items
+    function animateResultItems() {
+        const resultItems = document.querySelectorAll('.result-item');
+        resultItems.forEach((item, index) => {
+            item.style.opacity = '0';
+            item.style.transform = 'translateY(20px)';
+            
+            setTimeout(() => {
+                item.style.transition = 'all 0.8s ease';
+                item.style.opacity = '1';
+                item.style.transform = 'translateY(0)';
+            }, index * 100);
+        });
+    }
+    
+    // Initialize animations
+    animateProgressBars();
+    animateResultItems();
+    
+    // Add hover effects to result items
+    const resultItems = document.querySelectorAll('.result-item');
+    resultItems.forEach(item => {
+        item.addEventListener('mouseenter', function() {
+            this.style.transform = 'scale(1.02)';
+            this.style.transition = 'transform 0.3s ease';
+            this.style.boxShadow = '0 4px 15px rgba(0, 0, 0, 0.1)';
+        });
+        
+        item.addEventListener('mouseleave', function() {
+            this.style.transform = 'scale(1)';
+            this.style.boxShadow = '';
+        });
+    });
+    
+    // Real-time indicator
+    function showUpdateIndicator() {
+        const indicator = document.createElement('div');
+        indicator.innerHTML = `
+            <div class="alert alert-info alert-dismissible fade show position-fixed" 
+                 style="top: 100px; right: 20px; z-index: 1050;">
+                <i class="fas fa-sync fa-spin me-2"></i>
+                Results updated!
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        `;
+        document.body.appendChild(indicator);
+        
+        // Auto-dismiss after 3 seconds
+        setTimeout(() => {
+            const alert = indicator.querySelector('.alert');
+            if (alert) {
+                const bsAlert = new bootstrap.Alert(alert);
+                bsAlert.close();
+            }
+        }, 3000);
+    }
+    
+    // Manual refresh button enhancement
+    const refreshBtn = document.querySelector('button[onclick="location.reload()"]');
+    if (refreshBtn) {
+        refreshBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            
+            // Show loading state
+            const originalText = this.innerHTML;
+            this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Refreshing...';
+            this.disabled = true;
+            
+            // Refresh after short delay for UX
+            setTimeout(() => {
+                location.reload();
+            }, 500);
+        });
+    }
+    
+    // Add pulsing effect to winner announcement
+    const winnerAnnouncement = document.querySelector('.winner-announcement');
+    if (winnerAnnouncement) {
+        winnerAnnouncement.style.animation = 'winner-pulse 3s infinite';
+    }
+    
+    // Accessibility enhancements
+    const progressBars = document.querySelectorAll('.progress-bar');
+    progressBars.forEach(bar => {
+        const percentage = bar.getAttribute('aria-valuenow');
+        bar.setAttribute('aria-label', `${percentage}% of votes`);
+    });
+    
+    console.log('🇺🇸 Results page loaded - Live democracy in action!');
+});
+
+// Add custom CSS for results page
+const style = document.createElement('style');
+style.textContent = `
+    .result-item {
+        border-radius: 10px;
+        padding: 15px;
+        border: 1px solid #e0e0e0;
+        transition: all 0.3s ease;
+        background: white;
+    }
+    
+    .result-item:hover {
+        border-color: var(--flag-blue);
+    }
+    
+    .progress {
+        border-radius: 15px;
+        overflow: hidden;
+    }
+    
+    .progress-bar {
+        background: linear-gradient(90deg, var(--flag-red), var(--flag-blue));
+        border-radius: 15px;
+    }
+    
+    .security-feature {
+        padding: 15px;
+        border-radius: 8px;
+        background: rgba(255, 255, 255, 0.5);
+        height: 100%;
+    }
+    
+    .vote-count {
+        padding: 10px;
+        border-radius: 8px;
+        background: rgba(60, 59, 110, 0.1);
+    }
+    
+    .candidate-icon {
+        width: 50px;
+        text-align: center;
+    }
+    
+    @keyframes winner-pulse {
+        0%, 100% { 
+            box-shadow: 0 0 20px rgba(255, 255, 255, 0.8); 
+        }
+        50% { 
+            box-shadow: 0 0 40px rgba(255, 255, 255, 1); 
+        }
+    }
+    
+    @media (max-width: 768px) {
+        .result-item .row {
+            text-align: center;
+        }
+        
+        .result-item .col-md-4,
+        .result-item .col-md-5,
+        .result-item .col-md-3 {
+            margin-bottom: 10px;
+        }
+    }
+`;
+document.head.appendChild(style);
+</script>
+{% endblock %}

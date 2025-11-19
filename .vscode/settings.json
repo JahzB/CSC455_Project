@@ -1,0 +1,27 @@
+{
+    "html.validate.styles": false,
+    "css.validate": false,
+    "emmet.includeLanguages": {
+        "jinja-html": "html",
+        "jinja2": "html"
+    },
+    "files.associations": {
+        "*.html": "jinja-html"
+    },
+    "html.customData": [
+        {
+            "version": 1.1,
+            "tags": [],
+            "attributes": [
+                {
+                    "name": "style",
+                    "description": "Inline styles with Jinja2 template support"
+                }
+            ]
+        }
+    ],
+    "editor.quickSuggestions": {
+        "strings": true
+    },
+    "editor.suggest.insertMode": "replace"
+}

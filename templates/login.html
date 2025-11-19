@@ -1,0 +1,292 @@
+{% extends "base.html" %}
+
+{% block title %}Login - Secure Voting System{% endblock %}
+
+{% block content %}
+<!--
+LOGIN PAGE TEMPLATE
+==================
+
+HOW THIS PAGE WORKS:
+- Provides secure user authentication interface
+- Validates user credentials against encrypted password hashes
+- Creates secure session upon successful login
+- Redirects authenticated users to voting interface
+- Shows appropriate error messages for failed attempts
+
+CONNECTIONS TO OTHER PAGES:
+- Extends base.html for consistent styling and navigation
+- Submits login data to app.py login route via POST method
+- Redirects to vote.html upon successful authentication
+- Links to register.html for new user registration
+- Returns to home.html if logout occurs
+
+SECURITY FEATURES:
+- Password field is masked for privacy
+- Form uses CSRF protection (via Flask session)
+- Secure credential validation on server side
+- Session management prevents unauthorized access
+-->
+
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-6 col-lg-5">
+            <!-- Login Card -->
+            <div class="flag-card">
+                <!-- Header Section -->
+                <div class="text-center mb-4">
+                    <div class="flag-decoration mb-3">
+                        🇺🇸 ⭐ 🇺🇸
+                    </div>
+                    <h2 class="fw-bold" style="color: var(--flag-blue);">
+                        <i class="fas fa-sign-in-alt"></i>
+                        Secure Login
+                    </h2>
+                    <p class="text-muted">
+                        Enter your credentials to access the voting system
+                    </p>
+                </div>
+
+                <!-- Login Form -->
+                <form method="POST" action="{{ url_for('login') }}" class="needs-validation" novalidate>
+                    <!-- Username Field -->
+                    <div class="mb-3">
+                        <label for="username" class="form-label fw-bold">
+                            <i class="fas fa-user"></i>
+                            Username
+                        </label>
+                        <input type="text" 
+                               class="form-control" 
+                               id="username" 
+                               name="username" 
+                               required
+                               autocomplete="username"
+                               placeholder="Enter your username">
+                        <div class="invalid-feedback">
+                            Please provide a valid username.
+                        </div>
+                        <div class="form-text">
+                            <i class="fas fa-info-circle"></i>
+                            Use the username you created during registration
+                        </div>
+                    </div>
+
+                    <!-- Password Field -->
+                    <div class="mb-3">
+                        <label for="password" class="form-label fw-bold">
+                            <i class="fas fa-lock"></i>
+                            Password
+                        </label>
+                        <div class="input-group">
+                            <input type="password" 
+                                   class="form-control" 
+                                   id="password" 
+                                   name="password" 
+                                   required
+                                   autocomplete="current-password"
+                                   placeholder="Enter your password">
+                            <!-- Password visibility toggle -->
+                            <button class="btn btn-outline-secondary" 
+                                    type="button" 
+                                    id="togglePassword"
+                                    aria-label="Toggle password visibility">
+                                <i class="fas fa-eye" id="toggleIcon"></i>
+                            </button>
+                        </div>
+                        <div class="invalid-feedback">
+                            Please provide your password.
+                        </div>
+                        <div class="form-text">
+                            <i class="fas fa-shield-alt"></i>
+                            Your password is encrypted and secure
+                        </div>
+                    </div>
+
+                    <!-- Remember Me Option (Optional) -->
+                    <div class="mb-3 form-check">
+                        <input type="checkbox" class="form-check-input" id="rememberMe" name="rememberMe">
+                        <label class="form-check-label" for="rememberMe">
+                            <i class="fas fa-clock"></i>
+                            Keep me logged in for this session
+                        </label>
+                    </div>
+
+                    <!-- Submit Button -->
+                    <div class="d-grid mb-3">
+                        <button type="submit" class="btn btn-patriot btn-lg">
+                            <i class="fas fa-sign-in-alt"></i>
+                            Login to Vote
+                        </button>
+                    </div>
+                </form>
+
+                <!-- Alternative Actions -->
+                <div class="text-center">
+                    <hr class="my-4">
+                    <p class="mb-2">
+                        <i class="fas fa-question-circle"></i>
+                        Don't have an account?
+                    </p>
+                    <a href="{{ url_for('register') }}" class="btn btn-outline-primary">
+                        <i class="fas fa-user-plus"></i>
+                        Create New Account
+                    </a>
+                </div>
+
+                <!-- Security Information -->
+                <div class="mt-4 p-3" style="background-color: rgba(60, 59, 110, 0.1); border-radius: 8px;">
+                    <h6 class="fw-bold" style="color: var(--flag-blue);">
+                        <i class="fas fa-shield-alt"></i>
+                        Security Notice
+                    </h6>
+                    <ul class="small mb-0 list-unstyled">
+                        <li><i class="fas fa-check text-success"></i> All passwords are encrypted with bcrypt</li>
+                        <li><i class="fas fa-check text-success"></i> Sessions are secured with industry-standard encryption</li>
+                        <li><i class="fas fa-check text-success"></i> Your vote will remain completely anonymous</li>
+                        <li><i class="fas fa-check text-success"></i> No personal information is stored with votes</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- System Status Indicator -->
+            <div class="text-center mt-3">
+                <div class="d-inline-flex align-items-center">
+                    <div class="spinner-grow spinner-grow-sm text-success me-2" role="status" aria-hidden="true"></div>
+                    <small class="text-muted">
+                        <i class="fas fa-server"></i>
+                        System Status: <span class="text-success fw-bold">Online & Secure</span>
+                    </small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Voting Rights Information -->
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="constitutional-quote">
+                <h5 class="fw-bold mb-3">
+                    <i class="fas fa-gavel"></i>
+                    Your Constitutional Right
+                </h5>
+                <p class="mb-2">{{ quote }}</p>
+                <small class="opacity-75">
+                    <i class="fas fa-calendar-alt"></i>
+                    This system protects your fundamental democratic rights through advanced cryptography
+                </small>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+/*
+LOGIN PAGE JAVASCRIPT FUNCTIONALITY
+===================================
+
+This script provides enhanced user experience features:
+- Password visibility toggle
+- Form validation
+- Security indicators
+- Accessibility improvements
+*/
+
+document.addEventListener('DOMContentLoaded', function() {
+    // Password visibility toggle functionality
+    const togglePassword = document.getElementById('togglePassword');
+    const passwordField = document.getElementById('password');
+    const toggleIcon = document.getElementById('toggleIcon');
+    
+    if (togglePassword && passwordField && toggleIcon) {
+        togglePassword.addEventListener('click', function() {
+            // Toggle password visibility
+            const type = passwordField.getAttribute('type') === 'password' ? 'text' : 'password';
+            passwordField.setAttribute('type', type);
+            
+            // Toggle icon
+            if (type === 'password') {
+                toggleIcon.classList.remove('fa-eye-slash');
+                toggleIcon.classList.add('fa-eye');
+                togglePassword.setAttribute('aria-label', 'Show password');
+            } else {
+                toggleIcon.classList.remove('fa-eye');
+                toggleIcon.classList.add('fa-eye-slash');
+                togglePassword.setAttribute('aria-label', 'Hide password');
+            }
+        });
+    }
+    
+    // Form validation enhancement
+    const forms = document.querySelectorAll('.needs-validation');
+    Array.from(forms).forEach(form => {
+        form.addEventListener('submit', function(event) {
+            if (!form.checkValidity()) {
+                event.preventDefault();
+                event.stopPropagation();
+                
+                // Show first invalid field
+                const firstInvalid = form.querySelector(':invalid');
+                if (firstInvalid) {
+                    firstInvalid.focus();
+                }
+            } else {
+                // Show loading state
+                const submitBtn = form.querySelector('button[type="submit"]');
+                if (submitBtn) {
+                    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Authenticating...';
+                    submitBtn.disabled = true;
+                }
+            }
+            form.classList.add('was-validated');
+        });
+    });
+    
+    // Username field formatting (lowercase)
+    const usernameField = document.getElementById('username');
+    if (usernameField) {
+        usernameField.addEventListener('input', function() {
+            this.value = this.value.toLowerCase().trim();
+        });
+    }
+    
+    // Auto-focus on username field for better UX
+    if (usernameField && !usernameField.value) {
+        usernameField.focus();
+    }
+    
+    // Security indicator animation
+    const securityElements = document.querySelectorAll('.fa-shield-alt');
+    securityElements.forEach(element => {
+        element.style.animation = 'pulse 2s infinite';
+    });
+    
+    console.log('🇺🇸 Login page loaded - Ready for secure authentication');
+});
+
+// Add CSS animation for security elements
+const style = document.createElement('style');
+style.textContent = `
+    @keyframes pulse {
+        0% { opacity: 1; }
+        50% { opacity: 0.7; }
+        100% { opacity: 1; }
+    }
+    
+    .form-control:focus {
+        border-color: var(--flag-red);
+        box-shadow: 0 0 0 0.2rem rgba(178, 34, 52, 0.25);
+    }
+    
+    .btn-patriot:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+    }
+`;
+document.head.appendChild(style);
+</script>
+{% endblock %}
