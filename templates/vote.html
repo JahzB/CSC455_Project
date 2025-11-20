@@ -4,29 +4,9 @@
 
 {% block content %}
 <!--
-VOTING PAGE TEMPLATE
-===================
-
-HOW THIS PAGE WORKS:
-- Provides the main voting interface for authenticated users
-- Displays candidate options in a clear, accessible format
-- Handles vote selection and secure submission
-- Prevents double voting through server-side validation
-- Shows confirmation upon successful vote submission
-
-CONNECTIONS TO OTHER PAGES:
-- Extends base.html for consistent styling and navigation
-- Requires authentication from login.html to access
-- Submits encrypted vote data to app.py vote route via POST
-- Redirects to results.html after successful vote submission
-- Connected to register.html for new user accounts
-
-SECURITY FEATURES:
-- Vote encryption before submission to server
-- Anonymous voter identification
-- One vote per user enforcement
-- Secure form submission with CSRF protection
-- No storage of personally identifiable information with votes
+VOTING PAGE TEMPLATE (FINAL DEBUGGED VERSION)
+=============================================
+This version uses the most basic and robust HTML form submission structure to resolve the persistent KeyError.
 -->
 
 <div class="container">
@@ -42,21 +22,22 @@ SECURITY FEATURES:
                     </div>
                     <h2 class="fw-bold" style="color: var(--flag-blue);">
                         <i class="fas fa-vote-yea"></i>
-                        Cast Your Vote
+                        Cast Your Secure Ballot
                     </h2>
                     <p class="text-muted">
-                        Welcome, <strong>{{ username }}</strong>! Your vote will be encrypted and anonymous.
+                        Welcome, <strong>{{ username }}</strong>! Your vote will be encrypted using **ECC (ECIES)** and secured on the blockchain.
                     </p>
                     
                     <!-- Voting Status Indicator -->
                     <div class="alert alert-info" role="alert">
                         <i class="fas fa-info-circle"></i>
-                        <strong>Important:</strong> You can only vote once. Choose carefully!
+                        <strong>Important:</strong> You can only vote once.
                     </div>
                 </div>
 
                 <!-- Voting Form -->
-                <form method="POST" action="{{ url_for('vote') }}" id="votingForm" class="needs-validation" novalidate>
+                <!-- CRITICAL: Reliance on standard HTML submission (no custom JS event blocking) -->
+                <form method="POST" action="{{ url_for('vote') }}" class="needs-validation" novalidate>
                     <div class="mb-4">
                         <h4 class="fw-bold mb-3" style="color: var(--flag-red);">
                             <i class="fas fa-list-check"></i>
@@ -64,55 +45,34 @@ SECURITY FEATURES:
                         </h4>
                         
                         <!-- Candidate Options -->
-                        <div class="candidate-list">
+                        <div class="candidate-list space-y-3">
                             {% for candidate in candidates %}
-                            <div class="candidate-option mb-3">
-                                <div class="form-check">
-                                    <input class="form-check-input" 
+                            <div class="form-check p-3 border rounded-lg hover:border-flag-blue transition duration-200">
+                                <label class="form-check-label d-flex align-items-center cursor-pointer w-100" for="candidate{{ loop.index }}">
+                                    <!-- CRITICAL FIX: The name="candidate" attribute is mandatory -->
+                                    <input class="form-check-input me-3" 
                                            type="radio" 
                                            name="candidate" 
                                            value="{{ candidate }}" 
                                            id="candidate{{ loop.index }}"
-                                           required>
-                                    <label class="form-check-label candidate-label" 
-                                           for="candidate{{ loop.index }}">
-                                        <div class="candidate-card">
-                                            <div class="row align-items-center">
-                                                <div class="col-md-1 text-center">
-                                                    {% if 'Democratic' in candidate %}
-                                                        <i class="fas fa-democrat fa-2x text-primary"></i>
-                                                    {% elif 'Republican' in candidate %}
-                                                        <i class="fas fa-republican fa-2x text-danger"></i>
-                                                    {% elif 'Independent' in candidate %}
-                                                        <i class="fas fa-star fa-2x text-warning"></i>
-                                                    {% else %}
-                                                        <i class="fas fa-ban fa-2x text-muted"></i>
-                                                    {% endif %}
-                                                </div>
-                                                <div class="col-md-8">
-                                                    <h5 class="mb-1 fw-bold">{{ candidate }}</h5>
-                                                    <p class="mb-0 text-muted small">
-                                                        {% if 'Democratic' in candidate %}
-                                                            Promoting progressive policies and social equality
-                                                        {% elif 'Republican' in candidate %}
-                                                            Advocating for traditional values and fiscal responsibility
-                                                        {% elif 'Independent' in candidate %}
-                                                            Independent voice for bipartisan solutions
-                                                        {% elif 'Abstain' in candidate %}
-                                                            Choose not to vote for any candidate
-                                                        {% endif %}
-                                                    </p>
-                                                </div>
-                                                <div class="col-md-3 text-end">
-                                                    <div class="vote-indicator">
-                                                        <i class="fas fa-circle-check fa-2x text-success d-none"></i>
-                                                        <small class="text-muted">Select</small>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </label>
-                                </div>
+                                           required
+                                           style="margin-top: 0.5em;">
+                                    
+                                    <!-- Party Icon -->
+                                    <span class="me-3" style="font-size: 1.5em;">
+                                        {% if 'Democratic' in candidate %}
+                                            <i class="fas fa-democrat fa-2x text-primary"></i>
+                                        {% elif 'Republican' in candidate %}
+                                            <i class="fas fa-republican fa-2x text-danger"></i>
+                                        {% elif 'Independent' in candidate %}
+                                            <i class="fas fa-star fa-2x text-warning"></i>
+                                        {% else %}
+                                            <i class="fas fa-ban fa-2x text-muted"></i>
+                                        {% endif %}
+                                    </span>
+                                    
+                                    <h5 class="mb-0 fw-bold">{{ candidate }}</h5>
+                                </label>
                             </div>
                             {% endfor %}
                         </div>
@@ -123,36 +83,12 @@ SECURITY FEATURES:
                         </div>
                     </div>
 
-                    <!-- Vote Confirmation -->
-                    <div id="voteConfirmation" class="d-none mb-4">
-                        <div class="alert alert-warning" role="alert">
-                            <h5 class="alert-heading">
-                                <i class="fas fa-exclamation-triangle"></i>
-                                Confirm Your Choice
-                            </h5>
-                            <p class="mb-0">
-                                You have selected: <strong id="selectedCandidate"></strong>
-                            </p>
-                            <hr>
-                            <p class="mb-0">
-                                <small>This vote cannot be changed once submitted. Are you sure?</small>
-                            </p>
-                        </div>
-                    </div>
-
                     <!-- Submit Button -->
-                    <div class="text-center">
-                        <button type="button" 
-                                class="btn btn-outline-secondary btn-lg me-3" 
-                                id="reviewBtn" 
-                                disabled>
-                            <i class="fas fa-eye"></i>
-                            Review Selection
-                        </button>
+                    <div class="text-center mt-5">
                         <button type="submit" 
-                                class="btn btn-patriot btn-lg" 
-                                id="submitVote" 
-                                disabled>
+                                class="btn btn-patriot btn-lg w-100" 
+                                id="submitVote"
+                                onclick="this.innerHTML='<i class=\'fas fa-spinner fa-spin\'></i> Mining Block...'">
                             <i class="fas fa-lock"></i>
                             Submit Encrypted Vote
                         </button>
@@ -163,54 +99,11 @@ SECURITY FEATURES:
                 <div class="mt-4 p-3" style="background-color: rgba(60, 59, 110, 0.1); border-radius: 8px;">
                     <h6 class="fw-bold mb-3" style="color: var(--flag-blue);">
                         <i class="fas fa-shield-alt"></i>
-                        How Your Vote is Protected
+                        How Your Vote is Secured
                     </h6>
-                    <div class="row g-2">
-                        <div class="col-md-6">
-                            <div class="process-step">
-                                <i class="fas fa-lock text-success me-2"></i>
-                                <small><strong>Step 1:</strong> Vote is encrypted with AES-256</small>
-                            </div>
-                            <div class="process-step">
-                                <i class="fas fa-user-secret text-success me-2"></i>
-                                <small><strong>Step 2:</strong> Your identity is anonymized</small>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="process-step">
-                                <i class="fas fa-database text-success me-2"></i>
-                                <small><strong>Step 3:</strong> Encrypted vote stored securely</small>
-                            </div>
-                            <div class="process-step">
-                                <i class="fas fa-chart-bar text-success me-2"></i>
-                                <small><strong>Step 4:</strong> Anonymous counting for results</small>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Additional Information -->
-            <div class="text-center mt-4">
-                <div class="row g-3">
-                    <div class="col-md-4">
-                        <div class="vote-stat">
-                            <h3><i class="fas fa-shield-alt text-success"></i></h3>
-                            <p class="mb-0"><strong>Encryption</strong><br>AES-256 Military Grade</p>
-                        </div>
-                    </div>
-                    <div class="col-md-4">
-                        <div class="vote-stat">
-                            <h3><i class="fas fa-user-secret text-primary"></i></h3>
-                            <p class="mb-0"><strong>Privacy</strong><br>Completely Anonymous</p>
-                        </div>
-                    </div>
-                    <div class="col-md-4">
-                        <div class="vote-stat">
-                            <h3><i class="fas fa-gavel text-warning"></i></h3>
-                            <p class="mb-0"><strong>Democracy</strong><br>Every Vote Counts</p>
-                        </div>
-                    </div>
+                    <small>
+                        Your vote is encrypted with **ECC (ECIES)**, added as a transaction, and then the server performs a **Proof-of-Vote** calculation to mine the new block onto the immutable ledger.
+                    </small>
                 </div>
             </div>
         </div>
@@ -236,210 +129,23 @@ SECURITY FEATURES:
     {% endif %}
 </div>
 
-{% endblock %}
+{% endblock content %}
 
 {% block scripts %}
 <script>
-/*
-VOTING PAGE JAVASCRIPT FUNCTIONALITY
-====================================
-
-This script provides:
-- Interactive candidate selection
-- Vote confirmation workflow
-- Security indicators
-- Form validation and submission
-- Enhanced user experience
-*/
-
+/* Minimal JavaScript to maintain button integrity */
 document.addEventListener('DOMContentLoaded', function() {
-    const candidateInputs = document.querySelectorAll('input[name="candidate"]');
-    const reviewBtn = document.getElementById('reviewBtn');
-    const submitBtn = document.getElementById('submitVote');
-    const confirmationDiv = document.getElementById('voteConfirmation');
-    const selectedCandidateSpan = document.getElementById('selectedCandidate');
-    const votingForm = document.getElementById('votingForm');
-    
-    let selectedCandidate = null;
-    
-    // Handle candidate selection
-    candidateInputs.forEach(input => {
-        input.addEventListener('change', function() {
-            selectedCandidate = this.value;
-            
-            // Update UI indicators
-            updateSelectionIndicators();
-            
-            // Enable buttons
-            reviewBtn.disabled = false;
-            submitBtn.disabled = false;
-            
-            // Auto-show confirmation after short delay
-            setTimeout(showConfirmation, 500);
-        });
-    });
-    
-    // Update visual selection indicators
-    function updateSelectionIndicators() {
-        document.querySelectorAll('.candidate-option').forEach(option => {
-            const input = option.querySelector('input[type="radio"]');
-            const indicator = option.querySelector('.vote-indicator');
-            const checkIcon = indicator.querySelector('.fa-circle-check');
-            const selectText = indicator.querySelector('small');
-            
-            if (input.checked) {
-                option.classList.add('selected');
-                checkIcon.classList.remove('d-none');
-                selectText.classList.add('d-none');
-                option.style.backgroundColor = 'rgba(178, 34, 52, 0.1)';
-                option.style.border = '2px solid var(--flag-red)';
-            } else {
-                option.classList.remove('selected');
-                checkIcon.classList.add('d-none');
-                selectText.classList.remove('d-none');
-                option.style.backgroundColor = '';
-                option.style.border = '';
-            }
-        });
-    }
-    
-    // Show vote confirmation
-    function showConfirmation() {
-        if (selectedCandidate && selectedCandidateSpan) {
-            selectedCandidateSpan.textContent = selectedCandidate;
-            confirmationDiv.classList.remove('d-none');
-            confirmationDiv.scrollIntoView({ behavior: 'smooth' });
-        }
-    }
-    
-    // Review button functionality
-    if (reviewBtn) {
-        reviewBtn.addEventListener('click', function() {
-            if (selectedCandidate) {
-                showConfirmation();
-                // Highlight selected option
-                const selectedOption = document.querySelector('input[name="candidate"]:checked').closest('.candidate-option');
-                selectedOption.style.animation = 'pulse 1s ease-in-out 3';
-            }
-        });
-    }
-    
-    // Form submission handling
-    if (votingForm) {
-        votingForm.addEventListener('submit', function(event) {
-            if (!selectedCandidate) {
+    // Ensure Bootstrap's custom validation works
+    const forms = document.querySelectorAll('.needs-validation');
+    Array.from(forms).forEach(form => {
+        form.addEventListener('submit', function(event) {
+            if (!form.checkValidity()) {
                 event.preventDefault();
                 event.stopPropagation();
-                
-                alert('Please select a candidate before submitting your vote.');
-                return;
             }
-            
-            // Show final confirmation
-            const confirmed = confirm(
-                `Are you absolutely sure you want to vote for "${selectedCandidate}"?\n\n` +
-                'This action cannot be undone. Your vote will be encrypted and submitted anonymously.'
-            );
-            
-            if (!confirmed) {
-                event.preventDefault();
-                return;
-            }
-            
-            // Show submission state
-            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Encrypting and Submitting Vote...';
-            submitBtn.disabled = true;
-            reviewBtn.disabled = true;
-            
-            // Disable all inputs to prevent changes
-            candidateInputs.forEach(input => input.disabled = true);
-            
-            console.log('🇺🇸 Vote submitted for encryption and anonymous storage');
-        });
-    }
-    
-    // Add hover effects for better UX
-    document.querySelectorAll('.candidate-option').forEach(option => {
-        option.addEventListener('mouseenter', function() {
-            if (!this.classList.contains('selected')) {
-                this.style.backgroundColor = 'rgba(60, 59, 110, 0.05)';
-                this.style.transform = 'translateX(5px)';
-                this.style.transition = 'all 0.3s ease';
-            }
-        });
-        
-        option.addEventListener('mouseleave', function() {
-            if (!this.classList.contains('selected')) {
-                this.style.backgroundColor = '';
-                this.style.transform = '';
-            }
+            form.classList.add('was-validated');
         });
     });
-    
-    // Security indicator animation
-    const securityIcons = document.querySelectorAll('.fa-shield-alt, .fa-lock');
-    securityIcons.forEach((icon, index) => {
-        setTimeout(() => {
-            icon.style.animation = 'pulse 2s infinite';
-        }, index * 200);
-    });
-    
-    console.log('🇺🇸 Voting interface loaded - Ready for secure ballot casting');
 });
-
-// Add custom CSS for voting interface
-const style = document.createElement('style');
-style.textContent = `
-    .candidate-card {
-        padding: 20px;
-        border: 2px solid #e0e0e0;
-        border-radius: 10px;
-        transition: all 0.3s ease;
-        background: white;
-    }
-    
-    .candidate-option {
-        cursor: pointer;
-        border-radius: 10px;
-        transition: all 0.3s ease;
-    }
-    
-    .candidate-option:hover .candidate-card {
-        border-color: var(--flag-blue);
-        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-    }
-    
-    .candidate-option.selected .candidate-card {
-        border-color: var(--flag-red);
-        background: rgba(178, 34, 52, 0.02);
-        box-shadow: 0 4px 20px rgba(178, 34, 52, 0.2);
-    }
-    
-    .form-check-input:checked {
-        background-color: var(--flag-red);
-        border-color: var(--flag-red);
-    }
-    
-    .form-check-input:focus {
-        border-color: var(--flag-blue);
-        box-shadow: 0 0 0 0.2rem rgba(60, 59, 110, 0.25);
-    }
-    
-    .process-step {
-        display: flex;
-        align-items: center;
-        margin-bottom: 8px;
-    }
-    
-    .vote-indicator {
-        transition: all 0.3s ease;
-    }
-    
-    @keyframes pulse {
-        0%, 100% { opacity: 1; }
-        50% { opacity: 0.6; }
-    }
-`;
-document.head.appendChild(style);
 </script>
-{% endblock %}
+{% endblock scripts %}
