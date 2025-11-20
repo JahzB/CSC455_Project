@@ -235,6 +235,7 @@ def results():
                          vote_counts=vote_counts,
                          vote_percentages=vote_percentages,
                          total_votes=total_votes,
+                         total_users=len(users_db),
                          quote=VOTING_QUOTE)
 
 

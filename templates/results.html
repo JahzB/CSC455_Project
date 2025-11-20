@@ -63,8 +63,8 @@ SECURITY FEATURES:
                             <i class="fas fa-percentage"></i>
                         </h3>
                         <h4 class="fw-bold">
-                            {% if total_votes > 0 %}
-                                {{ "%.1f"|format((total_votes / (total_votes + 1)) * 100) }}%
+                            {% if total_users > 0 %}
+                                {{ "%.1f"|format((total_votes / total_users) * 100) }}%
                             {% else %}
                                 0.0%
                             {% endif %}
