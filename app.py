@@ -318,6 +318,12 @@ def chain_view():
                            quote=VOTING_QUOTE)
 
 
+@app.errorhandler(404)
+def page_not_found(e):
+    """404 ERROR HANDLER - Custom page for routes that don't exist"""
+    return render_template('404.html', quote=VOTING_QUOTE), 404
+
+
 if __name__ == '__main__':
     """APPLICATION ENTRY POINT"""
     print("🇺🇸 Starting Hybrid ECC + Blockchain Voting System...")
