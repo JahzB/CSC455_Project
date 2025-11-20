@@ -181,7 +181,7 @@ SECURITY FEATURES:
                         <div class="security-module text-center">
                             <i class="fas fa-key fa-3x mb-3" style="color: var(--flag-red);"></i>
                             <h6 class="fw-bold">Encryption Module</h6>
-                            <p class="small mb-2">AES-256 encryption for all vote data</p>
+                            <p class="small mb-2">ECC encryption for all vote data</p>
                             <span class="badge bg-success">Operational</span>
                         </div>
                     </div>
@@ -248,7 +248,8 @@ SECURITY FEATURES:
                     <div class="col-md-6">
                         <h6 class="fw-bold">Security Features:</h6>
                         <ul class="list-unstyled small">
-                            <li><i class="fas fa-check text-success me-2"></i>AES-256 vote encryption</li>
+                            <li><i class="fas fa-check text-success me-2"></i>ECC vote encryption</li>
+                            <li><i class="fas fa-check text-success me-2"></i>Blockchain immutability</li>
                             <li><i class="fas fa-check text-success me-2"></i>Bcrypt password hashing</li>
                             <li><i class="fas fa-check text-success me-2"></i>Anonymous voter identification</li>
                             <li><i class="fas fa-check text-success me-2"></i>Secure session management</li>
@@ -265,6 +266,166 @@ SECURITY FEATURES:
                             <li><i class="fas fa-check text-success me-2"></i>Zero personal data in vote records</li>
                         </ul>
                     </div>
+                </div>
+            </div>
+
+            <!-- Blockchain Ledger Viewer -->
+            <div class="flag-card mt-4">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h4 class="fw-bold mb-0" style="color: var(--flag-blue);">
+                        <i class="fas fa-link"></i>
+                        Blockchain Ledger
+                    </h4>
+                    <span class="badge {% if chain.is_valid %}bg-success{% else %}bg-danger{% endif %} fs-6">
+                        {% if chain.is_valid %}
+                            <i class="fas fa-check-circle"></i> Chain Valid
+                        {% else %}
+                            <i class="fas fa-exclamation-triangle"></i> Chain Invalid
+                        {% endif %}
+                    </span>
+                </div>
+                
+                <!-- Chain Summary -->
+                <div class="row g-3 mb-4">
+                    <div class="col-md-4">
+                        <div class="blockchain-stat">
+                            <i class="fas fa-cubes text-primary"></i>
+                            <strong>Total Blocks:</strong> {{ chain.length }}
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="blockchain-stat">
+                            <i class="fas fa-vote-yea text-success"></i>
+                            <strong>Total Votes:</strong> {{ stats.votes_cast }}
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="blockchain-stat">
+                            <i class="fas fa-shield-alt text-info"></i>
+                            <strong>Hash Algorithm:</strong> SHA-256
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Blockchain Blocks Display -->
+                <div class="blockchain-container">
+                    {% for block in chain.chain %}
+                    <div class="blockchain-block {% if loop.index == 1 %}genesis-block{% endif %} mb-3">
+                        <div class="block-header d-flex justify-content-between align-items-center p-3" 
+                             style="background: {% if loop.index == 1 %}linear-gradient(135deg, var(--flag-blue), var(--star-field)){% else %}linear-gradient(135deg, var(--flag-red), var(--flag-blue)){% endif %}; color: white; border-radius: 10px 10px 0 0;">
+                            <div>
+                                <h5 class="mb-0">
+                                    {% if loop.index == 1 %}
+                                        <i class="fas fa-star"></i> Genesis Block
+                                    {% else %}
+                                        <i class="fas fa-cube"></i> Block #{{ block.index }}
+                                    {% endif %}
+                                </h5>
+                            </div>
+                            <div class="text-end">
+                                <small>
+                                    <i class="fas fa-clock"></i>
+                                    {{ block.timestamp | int }}
+                                </small>
+                            </div>
+                        </div>
+                        
+                        <div class="block-body p-3" style="background: white; border: 2px solid var(--flag-blue); border-top: none; border-radius: 0 0 10px 10px;">
+                            <!-- Block Details -->
+                            <div class="row g-2 mb-2">
+                                <div class="col-md-6">
+                                    <small class="text-muted d-block">
+                                        <strong><i class="fas fa-fingerprint"></i> Proof:</strong>
+                                    </small>
+                                    <code class="text-primary">{{ block.proof }}</code>
+                                </div>
+                                <div class="col-md-6">
+                                    <small class="text-muted d-block">
+                                        <strong><i class="fas fa-vote-yea"></i> Votes in Block:</strong>
+                                    </small>
+                                    <span class="badge bg-info">{{ block.votes | length }}</span>
+                                </div>
+                            </div>
+                            
+                            <!-- Previous Hash -->
+                            <div class="mb-2">
+                                <small class="text-muted d-block">
+                                    <strong><i class="fas fa-link"></i> Previous Hash:</strong>
+                                </small>
+                                <code class="hash-display d-block">{{ block.previous_hash[:64] }}{% if block.previous_hash | length > 64 %}...{% endif %}</code>
+                            </div>
+                            
+                            <!-- Current Block Hash -->
+                            <div class="mb-3">
+                                <small class="text-muted d-block">
+                                    <strong><i class="fas fa-hashtag"></i> Block Hash:</strong>
+                                </small>
+                                <code class="hash-display d-block text-success">
+                                    {% set block_hash = block | string | hash('sha256') %}
+                                    {{ block_hash[:64] }}...
+                                </code>
+                            </div>
+                            
+                            <!-- Votes in Block (Encrypted) -->
+                            {% if block.votes | length > 0 %}
+                            <div class="votes-section">
+                                <button class="btn btn-sm btn-outline-primary w-100" type="button" 
+                                        data-bs-toggle="collapse" 
+                                        data-bs-target="#votes-block-{{ block.index }}" 
+                                        aria-expanded="false">
+                                    <i class="fas fa-eye"></i> Show {{ block.votes | length }} Encrypted Vote(s)
+                                </button>
+                                
+                                <div class="collapse mt-2" id="votes-block-{{ block.index }}">
+                                    <div class="encrypted-votes-container p-2" style="background: rgba(60, 59, 110, 0.05); border-radius: 5px; max-height: 300px; overflow-y: auto;">
+                                        {% for vote in block.votes %}
+                                        <div class="vote-entry mb-2 p-2" style="background: white; border-left: 3px solid var(--flag-red); border-radius: 3px;">
+                                            <small class="text-muted d-block">
+                                                <strong>Vote #{{ loop.index }}:</strong>
+                                            </small>
+                                            <small class="d-block mb-1">
+                                                <i class="fas fa-user-secret"></i> 
+                                                <strong>Voter Hash:</strong> 
+                                                <code>{{ vote.voter_hash }}</code>
+                                            </small>
+                                            <small class="d-block mb-1">
+                                                <i class="fas fa-lock"></i> 
+                                                <strong>Encrypted Data:</strong>
+                                            </small>
+                                            <code class="d-block small text-break" style="font-size: 0.7rem; max-height: 60px; overflow-y: auto;">
+                                                {{ vote.encrypted_vote[:200] }}...
+                                            </code>
+                                            <small class="text-muted d-block mt-1">
+                                                <i class="fas fa-clock"></i> 
+                                                Submitted: {{ vote.submission_time | int }}
+                                            </small>
+                                        </div>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                            </div>
+                            {% else %}
+                            <div class="alert alert-secondary mb-0 small">
+                                <i class="fas fa-info-circle"></i> No votes in this block (Genesis)
+                            </div>
+                            {% endif %}
+                        </div>
+                        
+                        <!-- Chain Link Arrow (except for last block) -->
+                        {% if not loop.last %}
+                        <div class="text-center my-2">
+                            <i class="fas fa-arrow-down fa-2x" style="color: var(--flag-blue);"></i>
+                        </div>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                </div>
+                
+                <!-- Quick Info -->
+                <div class="alert alert-info mt-3">
+                    <i class="fas fa-info-circle"></i>
+                    <strong>Blockchain Security:</strong> Each block is cryptographically linked via SHA-256 hashes. 
+                    Any tampering with vote data will break the chain and be immediately detected.
                 </div>
             </div>
         </div>
@@ -386,7 +547,8 @@ function testEncryption() {
                  style="top: 100px; right: 20px; z-index: 1050; min-width: 300px;">
                 <h6><i class="fas fa-check-circle me-2"></i>Security Test Complete</h6>
                 <ul class="mb-0 small">
-                    <li>✅ AES-256 encryption: Operational</li>
+                    <li>✅ ECC encryption: Operational</li>
+                    <li>✅ Blockchain ledger: Working</li>
                     <li>✅ Anonymous hashing: Working</li>
                     <li>✅ Data integrity: Verified</li>
                     <li>✅ Privacy protection: Active</li>
@@ -457,9 +619,86 @@ style.textContent = `
         transition: all 0.3s ease;
     }
     
+    /* Blockchain Viewer Styles */
+    .blockchain-container {
+        max-height: 800px;
+        overflow-y: auto;
+        padding: 10px;
+        background: rgba(255, 255, 255, 0.5);
+        border-radius: 10px;
+    }
+    
+    .blockchain-block {
+        transition: all 0.3s ease;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        border-radius: 10px;
+    }
+    
+    .blockchain-block:hover {
+        transform: translateX(5px);
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+    }
+    
+    .genesis-block {
+        border: 3px solid var(--flag-blue);
+    }
+    
+    .hash-display {
+        background: rgba(60, 59, 110, 0.05);
+        padding: 5px 10px;
+        border-radius: 5px;
+        font-size: 0.85rem;
+        word-break: break-all;
+        font-family: 'Courier New', monospace;
+    }
+    
+    .blockchain-stat {
+        background: rgba(255, 255, 255, 0.8);
+        padding: 12px;
+        border-radius: 8px;
+        border: 1px solid #e0e0e0;
+        text-align: center;
+    }
+    
+    .blockchain-stat i {
+        font-size: 1.2rem;
+        margin-right: 5px;
+    }
+    
+    .vote-entry {
+        transition: all 0.2s ease;
+    }
+    
+    .vote-entry:hover {
+        transform: scale(1.02);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+    
+    .encrypted-votes-container::-webkit-scrollbar {
+        width: 8px;
+    }
+    
+    .encrypted-votes-container::-webkit-scrollbar-track {
+        background: #f1f1f1;
+        border-radius: 4px;
+    }
+    
+    .encrypted-votes-container::-webkit-scrollbar-thumb {
+        background: var(--flag-blue);
+        border-radius: 4px;
+    }
+    
+    .encrypted-votes-container::-webkit-scrollbar-thumb:hover {
+        background: var(--flag-red);
+    }
+    
     @media (max-width: 768px) {
         .row.g-4 .col-md-3 {
             margin-bottom: 1rem;
+        }
+        
+        .blockchain-container {
+            max-height: 600px;
         }
     }
 `;
