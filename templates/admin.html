@@ -361,8 +361,7 @@ SECURITY FEATURES:
                                     <strong><i class="fas fa-hashtag"></i> Block Hash:</strong>
                                 </small>
                                 <code class="hash-display d-block text-success">
-                                    {% set block_hash = block | string | hash('sha256') %}
-                                    {{ block_hash[:64] }}...
+                                    {{ chain.block_hashes[loop.index0][:64] }}...
                                 </code>
                             </div>
                             
