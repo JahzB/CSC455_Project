@@ -1,0 +1,559 @@
+{% extends "base.html" %}
+
+{% block title %}Blockchain View - Secure Voting System{% endblock %}
+
+{% block content %}
+<!--
+BLOCKCHAIN VIEW TEMPLATE
+========================
+
+HOW THIS PAGE WORKS:
+- Displays the raw, immutable blockchain ledger for verification
+- Shows all blocks in the chain with complete details
+- Allows users to verify the integrity of the voting system
+- Provides transparency into the cryptographic security
+- Displays chain validation status in real-time
+
+CONNECTIONS TO OTHER PAGES:
+- Extends base.html for consistent styling and navigation
+- Provides technical verification for results.html data
+- Accessible to logged-in users for transparency
+- Shows the underlying data structure supporting vote.html
+
+SECURITY FEATURES:
+- Read-only view of blockchain data
+- Displays hash verification for integrity
+- Shows cryptographic proof of immutability
+- Validates entire chain integrity
+- Transparent verification without privacy compromise
+-->
+
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-11">
+            <!-- Blockchain Header -->
+            <div class="flag-card text-center">
+                <div class="flag-decoration mb-3">
+                    🔗 🔒 🇺🇸 🔒 🔗
+                </div>
+                <h2 class="fw-bold" style="color: var(--flag-blue);">
+                    <i class="fas fa-link"></i>
+                    Blockchain Ledger View
+                </h2>
+                <p class="text-muted mb-0">
+                    Immutable cryptographic verification of all votes
+                </p>
+            </div>
+
+            <!-- Chain Statistics -->
+            <div class="row g-4 mb-4">
+                <div class="col-md-4">
+                    <div class="vote-stat text-center">
+                        <h3 style="color: var(--flag-blue);">
+                            <i class="fas fa-cubes"></i>
+                        </h3>
+                        <h4 class="fw-bold">{{ length }}</h4>
+                        <p class="mb-0">Total Blocks</p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="vote-stat text-center">
+                        <h3 style="color: {% if is_valid %}var(--flag-blue){% else %}var(--flag-red){% endif %};">
+                            <i class="fas fa-{% if is_valid %}check-circle{% else %}exclamation-triangle{% endif %}"></i>
+                        </h3>
+                        <h4 class="fw-bold">{% if is_valid %}VALID{% else %}INVALID{% endif %}</h4>
+                        <p class="mb-0">Chain Integrity</p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="vote-stat text-center">
+                        <h3 style="color: var(--flag-red);">
+                            <i class="fas fa-shield-alt"></i>
+                        </h3>
+                        <h4 class="fw-bold">SHA-256</h4>
+                        <p class="mb-0">Hash Algorithm</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Chain Validation Alert -->
+            {% if is_valid %}
+            <div class="alert alert-success d-flex align-items-center" role="alert">
+                <i class="fas fa-check-circle fa-2x me-3"></i>
+                <div>
+                    <h5 class="mb-1 fw-bold">Blockchain Integrity Verified ✓</h5>
+                    <p class="mb-0">All blocks are cryptographically linked and unmodified. The voting system is secure and tamper-proof.</p>
+                </div>
+            </div>
+            {% else %}
+            <div class="alert alert-danger d-flex align-items-center" role="alert">
+                <i class="fas fa-exclamation-triangle fa-2x me-3"></i>
+                <div>
+                    <h5 class="mb-1 fw-bold">Blockchain Integrity Compromised!</h5>
+                    <p class="mb-0">Chain validation has failed. This may indicate tampering or data corruption.</p>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Blockchain Blocks -->
+            <div class="blockchain-container">
+                {% for block in chain %}
+                <div class="block-card flag-card mb-4" data-block-index="{{ block['index'] }}">
+                    <!-- Block Header -->
+                    <div class="block-header d-flex justify-content-between align-items-center mb-3">
+                        <h4 class="fw-bold mb-0" style="color: var(--flag-blue);">
+                            <i class="fas fa-cube"></i>
+                            Block #{{ block['index'] }}
+                            {% if block['index'] == 1 %}
+                            <span class="badge bg-primary ms-2">Genesis Block</span>
+                            {% endif %}
+                        </h4>
+                        <small class="text-muted">
+                            <i class="fas fa-clock"></i>
+                            {{ block['timestamp']|int }}
+                        </small>
+                    </div>
+
+                    <!-- Block Details Grid -->
+                    <div class="row g-3">
+                        <!-- Block Hash -->
+                        <div class="col-md-6">
+                            <div class="block-detail">
+                                <label class="fw-bold text-muted small">
+                                    <i class="fas fa-fingerprint"></i> Block Hash
+                                </label>
+                                <div class="hash-display" title="{{ block_hashes[loop.index0] }}">
+                                    <code class="text-primary">{{ block_hashes[loop.index0][:16] }}...{{ block_hashes[loop.index0][-16:] }}</code>
+                                    <button class="btn btn-sm btn-outline-secondary ms-2 copy-btn" 
+                                            onclick="copyToClipboard('{{ block_hashes[loop.index0] }}', this)"
+                                            title="Copy full hash">
+                                        <i class="fas fa-copy"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Previous Hash -->
+                        <div class="col-md-6">
+                            <div class="block-detail">
+                                <label class="fw-bold text-muted small">
+                                    <i class="fas fa-link"></i> Previous Hash
+                                </label>
+                                <div class="hash-display" title="{{ block['previous_hash'] }}">
+                                    <code class="text-secondary">{{ block['previous_hash'][:16] }}...{{ block['previous_hash'][-16:] }}</code>
+                                    <button class="btn btn-sm btn-outline-secondary ms-2 copy-btn" 
+                                            onclick="copyToClipboard('{{ block['previous_hash'] }}', this)"
+                                            title="Copy full hash">
+                                        <i class="fas fa-copy"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Proof of Work -->
+                        <div class="col-md-6">
+                            <div class="block-detail">
+                                <label class="fw-bold text-muted small">
+                                    <i class="fas fa-hammer"></i> Proof of Work
+                                </label>
+                                <div>
+                                    <code class="text-success">{{ block['proof'] }}</code>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Vote Count -->
+                        <div class="col-md-6">
+                            <div class="block-detail">
+                                <label class="fw-bold text-muted small">
+                                    <i class="fas fa-exchange-alt"></i> Votes
+                                </label>
+                                <div>
+                                    <span class="badge bg-info">{{ block['votes']|length }} vote(s)</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Vote Details -->
+                    {% if block['votes']|length > 0 %}
+                    <div class="transactions-section mt-4">
+                        <h6 class="fw-bold mb-3" style="color: var(--flag-red);">
+                            <i class="fas fa-list"></i>
+                            Vote Details
+                        </h6>
+                        
+                        {% for vote in block['votes'] %}
+                        <div class="transaction-item p-3 mb-2" style="background: rgba(60, 59, 110, 0.05); border-radius: 8px;">
+                            <div class="row g-2">
+                                <div class="col-md-4">
+                                    <small class="fw-bold text-muted d-block">Voter Hash</small>
+                                    <code class="small">{{ vote['voter_hash'][:12] }}...{{ vote['voter_hash'][-12:] }}</code>
+                                </div>
+                                <div class="col-md-4">
+                                    <small class="fw-bold text-muted d-block">Encrypted Vote</small>
+                                    <code class="small text-success">{{ vote['encrypted_vote'][:12] }}...{{ vote['encrypted_vote'][-12:] }}</code>
+                                </div>
+                                <div class="col-md-4">
+                                    <small class="fw-bold text-muted d-block">Submission Time</small>
+                                    <span class="small">{{ vote['submission_time']|int }}</span>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <div class="mt-3 text-center text-muted">
+                        <i class="fas fa-inbox"></i>
+                        <small>No votes in this block</small>
+                    </div>
+                    {% endif %}
+                </div>
+                {% endfor %}
+            </div>
+
+            <!-- Blockchain Information -->
+            <div class="flag-card mt-4">
+                <h4 class="fw-bold mb-3" style="color: var(--flag-blue);">
+                    <i class="fas fa-info-circle"></i>
+                    Understanding the Blockchain
+                </h4>
+                <div class="row g-4">
+                    <div class="col-md-6">
+                        <div class="info-item">
+                            <div class="d-flex align-items-start">
+                                <i class="fas fa-link fa-2x text-primary me-3 mt-1"></i>
+                                <div>
+                                    <h6 class="fw-bold">Cryptographic Linking</h6>
+                                    <p class="mb-0 small">
+                                        Each block contains the hash of the previous block, creating an 
+                                        immutable chain. Any attempt to modify past blocks would break the chain.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="info-item">
+                            <div class="d-flex align-items-start">
+                                <i class="fas fa-lock fa-2x text-success me-3 mt-1"></i>
+                                <div>
+                                    <h6 class="fw-bold">Immutability</h6>
+                                    <p class="mb-0 small">
+                                        Once a vote is recorded in a block, it cannot be altered or deleted 
+                                        without invalidating the entire chain, ensuring permanent record-keeping.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="info-item">
+                            <div class="d-flex align-items-start">
+                                <i class="fas fa-fingerprint fa-2x text-warning me-3 mt-1"></i>
+                                <div>
+                                    <h6 class="fw-bold">SHA-256 Hashing</h6>
+                                    <p class="mb-0 small">
+                                        Cryptographic hashing ensures that each block has a unique fingerprint. 
+                                        Even tiny changes would completely alter the hash.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="info-item">
+                            <div class="d-flex align-items-start">
+                                <i class="fas fa-shield-alt fa-2x text-danger me-3 mt-1"></i>
+                                <div>
+                                    <h6 class="fw-bold">Proof of Work</h6>
+                                    <p class="mb-0 small">
+                                        Each block requires computational work to be created, making it 
+                                        extremely difficult and expensive to forge or manipulate the chain.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="text-center mt-4 mb-5">
+                <a href="{{ url_for('results') }}" class="btn btn-patriot me-3">
+                    <i class="fas fa-chart-bar"></i>
+                    View Results
+                </a>
+                <button onclick="location.reload()" class="btn btn-outline-primary me-3">
+                    <i class="fas fa-sync-alt"></i>
+                    Refresh Chain
+                </button>
+                <button onclick="downloadChainData()" class="btn btn-outline-secondary">
+                    <i class="fas fa-download"></i>
+                    Export Chain Data
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+/*
+BLOCKCHAIN VIEW PAGE JAVASCRIPT
+================================
+
+This script provides:
+- Hash copying functionality
+- Block visualization enhancements
+- Chain validation indicators
+- Export functionality for blockchain data
+- Interactive block exploration
+*/
+
+// Copy hash to clipboard
+function copyToClipboard(text, button) {
+    navigator.clipboard.writeText(text).then(() => {
+        const originalIcon = button.innerHTML;
+        button.innerHTML = '<i class="fas fa-check"></i>';
+        button.classList.remove('btn-outline-secondary');
+        button.classList.add('btn-success');
+        
+        setTimeout(() => {
+            button.innerHTML = originalIcon;
+            button.classList.remove('btn-success');
+            button.classList.add('btn-outline-secondary');
+        }, 2000);
+    }).catch(err => {
+        console.error('Failed to copy:', err);
+        alert('Failed to copy hash to clipboard');
+    });
+}
+
+// Download chain data as JSON
+function downloadChainData() {
+    const chainData = {
+        chain: {{ chain|tojson }},
+        length: {{ length }},
+        is_valid: {{ is_valid|tojson }},
+        exported_at: new Date().toISOString()
+    };
+    
+    const dataStr = JSON.stringify(chainData, null, 2);
+    const dataBlob = new Blob([dataStr], { type: 'application/json' });
+    const url = URL.createObjectURL(dataBlob);
+    
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `blockchain_export_${new Date().toISOString().split('T')[0]}.json`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+    
+    // Show success message
+    const alert = document.createElement('div');
+    alert.innerHTML = `
+        <div class="alert alert-success alert-dismissible fade show position-fixed" 
+             style="top: 100px; right: 20px; z-index: 1050;">
+            <i class="fas fa-download me-2"></i>
+            Blockchain data exported successfully!
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    `;
+    document.body.appendChild(alert);
+    
+    setTimeout(() => {
+        const alertElement = alert.querySelector('.alert');
+        if (alertElement) {
+            const bsAlert = new bootstrap.Alert(alertElement);
+            bsAlert.close();
+        }
+    }, 3000);
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    // Animate blocks on load
+    const blocks = document.querySelectorAll('.block-card');
+    blocks.forEach((block, index) => {
+        block.style.opacity = '0';
+        block.style.transform = 'translateY(30px)';
+        
+        setTimeout(() => {
+            block.style.transition = 'all 0.8s ease';
+            block.style.opacity = '1';
+            block.style.transform = 'translateY(0)';
+        }, index * 100);
+    });
+    
+    // Add hover effects to blocks
+    blocks.forEach(block => {
+        block.addEventListener('mouseenter', function() {
+            this.style.transform = 'scale(1.01)';
+            this.style.boxShadow = '0 8px 24px rgba(0, 0, 0, 0.15)';
+        });
+        
+        block.addEventListener('mouseleave', function() {
+            this.style.transform = 'scale(1)';
+            this.style.boxShadow = '';
+        });
+    });
+    
+    // Highlight hash connections
+    const hashDisplays = document.querySelectorAll('.hash-display');
+    hashDisplays.forEach(display => {
+        display.addEventListener('mouseenter', function() {
+            this.style.backgroundColor = 'rgba(60, 59, 110, 0.1)';
+            this.style.borderRadius = '5px';
+            this.style.padding = '5px';
+        });
+        
+        display.addEventListener('mouseleave', function() {
+            this.style.backgroundColor = '';
+            this.style.padding = '';
+        });
+    });
+    
+    // Add visual indicators for block connections
+    function visualizeBlockConnections() {
+        const blocks = document.querySelectorAll('.block-card');
+        blocks.forEach((block, index) => {
+            if (index > 0) {
+                const connector = document.createElement('div');
+                connector.className = 'block-connector';
+                connector.innerHTML = '<i class="fas fa-arrow-down fa-2x"></i>';
+                block.parentElement.insertBefore(connector, block);
+            }
+        });
+    }
+    
+    visualizeBlockConnections();
+    
+    // Chain validation animation
+    const validationAlert = document.querySelector('.alert-success, .alert-danger');
+    if (validationAlert) {
+        validationAlert.style.animation = 'slideInDown 0.8s ease';
+    }
+    
+    // Add info tooltips
+    const copyButtons = document.querySelectorAll('.copy-btn');
+    copyButtons.forEach(btn => {
+        btn.setAttribute('data-bs-toggle', 'tooltip');
+        btn.setAttribute('data-bs-placement', 'top');
+    });
+    
+    // Initialize Bootstrap tooltips if available
+    if (typeof bootstrap !== 'undefined' && bootstrap.Tooltip) {
+        const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+        tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl);
+        });
+    }
+    
+    console.log('🔗 Blockchain view loaded - Chain integrity:', {{ is_valid|tojson }});
+});
+
+// Add custom CSS for blockchain view
+const style = document.createElement('style');
+style.textContent = `
+    .block-card {
+        border-left: 5px solid var(--flag-blue);
+        transition: all 0.3s ease;
+    }
+    
+    .block-card:hover {
+        border-left-color: var(--flag-red);
+    }
+    
+    .block-header {
+        border-bottom: 2px solid rgba(60, 59, 110, 0.1);
+        padding-bottom: 10px;
+    }
+    
+    .block-detail {
+        padding: 10px;
+        background: rgba(255, 255, 255, 0.5);
+        border-radius: 8px;
+    }
+    
+    .hash-display {
+        font-family: 'Courier New', monospace;
+        word-break: break-all;
+        transition: all 0.3s ease;
+    }
+    
+    .hash-display code {
+        font-size: 0.85rem;
+    }
+    
+    .copy-btn {
+        padding: 2px 8px;
+        font-size: 0.75rem;
+    }
+    
+    .transaction-item {
+        border-left: 3px solid var(--flag-blue);
+        transition: all 0.3s ease;
+    }
+    
+    .transaction-item:hover {
+        border-left-color: var(--flag-red);
+        background: rgba(60, 59, 110, 0.1) !important;
+    }
+    
+    .info-item {
+        padding: 15px;
+        border-radius: 8px;
+        background: rgba(255, 255, 255, 0.5);
+        height: 100%;
+        transition: all 0.3s ease;
+    }
+    
+    .info-item:hover {
+        background: rgba(255, 255, 255, 0.8);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+    
+    .block-connector {
+        text-align: center;
+        color: var(--flag-blue);
+        margin: -10px 0;
+        animation: pulse 2s ease-in-out infinite;
+    }
+    
+    @keyframes slideInDown {
+        from {
+            opacity: 0;
+            transform: translateY(-20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    @keyframes pulse {
+        0%, 100% {
+            opacity: 0.6;
+        }
+        50% {
+            opacity: 1;
+        }
+    }
+    
+    @media (max-width: 768px) {
+        .hash-display code {
+            font-size: 0.7rem;
+        }
+        
+        .block-card {
+            padding: 15px !important;
+        }
+    }
+`;
+document.head.appendChild(style);
+</script>
+{% endblock %}

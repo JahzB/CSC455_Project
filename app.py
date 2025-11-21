@@ -235,6 +235,7 @@ def results():
                          vote_counts=vote_counts,
                          vote_percentages=vote_percentages,
                          total_votes=total_votes,
+                         total_users=len(users_db),
                          quote=VOTING_QUOTE)
 
 
@@ -272,9 +273,15 @@ def admin():
         'chain_length': len(blockchain.chain)
     }
     
+    # Calculate hashes for each block without modifying the original blocks
+    block_hashes = []
+    for block in blockchain.chain:
+        block_hashes.append(blockchain.hash(block))
+    
     # Pass blockchain data for admin view
     chain_data = {
         'chain': blockchain.chain,
+        'block_hashes': block_hashes,
         'length': len(blockchain.chain),
         'is_valid': blockchain.is_chain_valid(blockchain.chain)
     }
@@ -291,17 +298,30 @@ def chain_view():
     if 'logged_in' not in session:
         return redirect(url_for('login'))
     
+    # Calculate hashes for each block without modifying the original blocks
+    block_hashes = []
+    for block in blockchain.chain:
+        block_hashes.append(blockchain.hash(block))
+    
     response = {
         'chain': blockchain.chain,
+        'block_hashes': block_hashes,
         'length': len(blockchain.chain),
         'is_valid': blockchain.is_chain_valid(blockchain.chain)
     }
     
     return render_template('chain_view.html', 
                            chain=response['chain'],
+                           block_hashes=response['block_hashes'],
                            length=response['length'],
                            is_valid=response['is_valid'],
                            quote=VOTING_QUOTE)
+
+
+@app.errorhandler(404)
+def page_not_found(e):
+    """404 ERROR HANDLER - Custom page for routes that don't exist"""
+    return render_template('404.html', quote=VOTING_QUOTE), 404
 
 
 if __name__ == '__main__':
